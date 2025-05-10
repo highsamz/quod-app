@@ -15,6 +15,7 @@ public class ValidacaoService {
     private ValidacaoRepository validacaoRepository;
 
     public ImagemEntity salvar(ImagemDto imagemDto) throws IOException {
+        System.out.println("Salvando imagem: " + imagemDto);
         return validacaoRepository.save(new ImagemEntity(imagemDto));
     }
 }

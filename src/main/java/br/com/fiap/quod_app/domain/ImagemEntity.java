@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@Document(collection = "imagens")
+@Document(collection = "validations")
 @Data
 @Getter
 @Setter

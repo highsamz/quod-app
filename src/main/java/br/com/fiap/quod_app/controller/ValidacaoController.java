@@ -1,6 +1,5 @@
 package br.com.fiap.quod_app.controller;
 
-import br.com.fiap.quod_app.domain.ImagemEntity;
 import br.com.fiap.quod_app.dto.ImagemDto;
 import br.com.fiap.quod_app.service.ValidacaoService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,7 +21,7 @@ public class ValidacaoController {
     ValidacaoService validacaoService;
 
     @PostMapping(value = "/validar", consumes = "multipart/form-data")
-    public ResponseEntity<?> validarImagem( @Parameter(description = "Tipo de validação") @RequestParam("tipo") String tipo,
+    ResponseEntity<?> validarImagem( @Parameter(description = "Tipo de validação") @RequestParam("tipo") String tipo,
                                             @Parameter(description = "Imagem para validação",
                                                     content = @Content(mediaType = "application/octet-stream",
                                                             schema = @Schema(type = "string", format = "binary")))

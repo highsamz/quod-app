@@ -10,29 +10,48 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Document(collection = "validations")
-@Data
-@Getter
-@Setter
+@Data// Gera getters, setters, toString, etc.
 @AllArgsConstructor
+@NoArgsConstructor
 public class ImagemEntity {
 
     @Id
     private String id;
 
-    private byte[] imagem; // Binário da imagem capturada (face, digital ou documento)
+    private byte[] imagem;
 
-    private String tipo; // "facial", "digital", "documento"
+    private TipoValidacao tipo;
 
-    private boolean fraudeDetectada;
+    private boolean fraudeDetectada; // <-- Lombok gera setFraudeDetectada(boolean)
 
     private LocalDateTime dataHoraProcessamento;
 
-    private Map<String, Object> metadados; // Ex: qualidade, fabricante, localização etc.
+    private Map<String, Object> metadados;
 
     private String referenciaNotificacao;
 
-    public ImagemEntity (ImagemDto imagemDto) throws IOException {
+    public ImagemEntity(ImagemDto imagemDto) throws IOException {
         this.imagem = imagemDto.imagem().getBytes();
         this.tipo = imagemDto.tipo();
+        this.dataHoraProcessamento = LocalDateTime.now();
+
     }
+
+    public void setFraudeDetectada(boolean fraudeDetectada) {
+        this.fraudeDetectada = fraudeDetectada;
+    }
+
+    public boolean isFraudeDetectada() {
+        return this.fraudeDetectada;
+    }
+
+    public void setDataHoraProcessamento(LocalDateTime dataHoraProcessamento) {
+        this.dataHoraProcessamento = dataHoraProcessamento;
+    }
+
 }
+
+
+
+
+

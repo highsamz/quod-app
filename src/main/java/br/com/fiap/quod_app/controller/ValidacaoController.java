@@ -1,10 +1,15 @@
 package br.com.fiap.quod_app.controller;
 
+
+import br.com.fiap.quod_app.domain.ImagemEntity;
+import br.com.fiap.quod_app.domain.TipoValidacao;
 import br.com.fiap.quod_app.dto.ImagemDto;
 import br.com.fiap.quod_app.service.ValidacaoService;
-import io.swagger.v3.oas.annotations.Parameter;
+
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +25,23 @@ public class ValidacaoController {
     @Autowired
     ValidacaoService validacaoService;
 
+    @Operation(
+            summary = "Valida uma imagem facial",
+            description = "Detecta se há um rosto na imagem e classifica como 'fraude' ou 'válida'.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Imagem processada.",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ImagemEntity.class)))
+            }
+    )
     @PostMapping(value = "/validar", consumes = "multipart/form-data")
-    ResponseEntity<?> validarImagem( @Parameter(description = "Tipo de validação") @RequestParam("tipo") String tipo,
-                                            @Parameter(description = "Imagem para validação",
-                                                    content = @Content(mediaType = "application/octet-stream",
-                                                            schema = @Schema(type = "string", format = "binary")))
-                                            @RequestParam("imagem") MultipartFile imagem) throws IOException {
-        var arquivo = new ImagemDto(tipo,imagem);
-        validacaoService.salvar(arquivo);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Processado com sucesso");
+    public ResponseEntity<?> validarImagem(@RequestParam("tipo") TipoValidacao tipo,
+                                           @RequestParam("imagem") MultipartFile imagem) throws IOException {
+        var arquivo = new ImagemDto(tipo, imagem);
+        ImagemEntity imagemEntity = validacaoService.salvar(arquivo);
+        if (imagemEntity.getFraudeDetectada()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Fraude detectada. Nenhum rosto encontrado.");
+        } else {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Imagem válida. Rosto detectado.");
+        }
     }
 }

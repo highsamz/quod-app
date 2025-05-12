@@ -79,10 +79,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.opencv</groupId>
+			<groupId>org.openpnp</groupId>
 			<artifactId>opencv</artifactId>
-			<version>4.11.0</version>
+			<version>4.7.0-0</version>
 		</dependency>
+
+
 
 
 	</dependencies>

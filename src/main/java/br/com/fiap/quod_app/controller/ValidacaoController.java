@@ -36,17 +36,11 @@ public class ValidacaoController {
     @PostMapping(value = "/validar", consumes = "multipart/form-data")
     public ResponseEntity<?> validarImagem(@RequestParam("tipo") TipoValidacao tipo,
                                            @RequestParam("imagem") MultipartFile imagem) throws IOException {
-
-        // Criação do DTO
         var arquivo = new ImagemDto(tipo, imagem);
         ImagemEntity imagemEntity = validacaoService.salvar(arquivo);
-
-        // Verifica se a imagem foi marcada como fraude ou válida
-        if (imagemEntity.isFraudeDetectada()) {
-            // Se a fraude foi detectada, retornamos "Fraude detectada"
+        if (imagemEntity.getFraudeDetectada()) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Fraude detectada. Nenhum rosto encontrado.");
         } else {
-            // Se o rosto foi detectado, retornamos "Imagem válida"
             return ResponseEntity.status(HttpStatus.CREATED).body("Imagem válida. Rosto detectado.");
         }
     }

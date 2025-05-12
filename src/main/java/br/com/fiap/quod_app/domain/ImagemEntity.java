@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Document(collection = "validations")
-@Data// Gera getters, setters, toString, etc.
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class ImagemEntity {
 
     @Id
@@ -22,7 +22,7 @@ public class ImagemEntity {
 
     private TipoValidacao tipo;
 
-    private boolean fraudeDetectada; // <-- Lombok gera setFraudeDetectada(boolean)
+    private Boolean fraudeDetectada;
 
     private LocalDateTime dataHoraProcessamento;
 
@@ -37,18 +37,17 @@ public class ImagemEntity {
 
     }
 
-    public void setFraudeDetectada(boolean fraudeDetectada) {
-        this.fraudeDetectada = fraudeDetectada;
+    public Boolean getFraudeDetectada(){
+        return this.fraudeDetectada;
     }
 
-    public boolean isFraudeDetectada() {
-        return this.fraudeDetectada;
+    public void setFraudeDetectada(Boolean fraudeDetectada) {
+        this.fraudeDetectada = fraudeDetectada;
     }
 
     public void setDataHoraProcessamento(LocalDateTime dataHoraProcessamento) {
         this.dataHoraProcessamento = dataHoraProcessamento;
     }
-
 }
 
 

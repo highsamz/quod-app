@@ -4,6 +4,12 @@ import br.com.fiap.quod_app.domain.ImagemEntity;
 import br.com.fiap.quod_app.domain.TipoValidacao;
 import br.com.fiap.quod_app.dto.ImagemDto;
 import br.com.fiap.quod_app.repository.ValidacaoRepository;
+import br.com.fiap.quod_app.utils.ImagemMetadataUtil;
+import br.com.fiap.quod_app.utils.ValidacaoFraudeUtil;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -16,6 +22,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class ValidacaoService {
@@ -23,71 +31,38 @@ public class ValidacaoService {
     @Autowired
     private ValidacaoRepository validacaoRepository;
 
-    static {
-        try {
-            System.out.println("Iniciando carregamento da DLL do OpenCV...");
-
-            // Localiza a DLL no classpath
-            InputStream dllStream = ValidacaoService.class.getResourceAsStream("/libs/opencv_java4110.dll");
-            if (dllStream == null) {
-                throw new IllegalStateException("DLL do OpenCV não encontrada no classpath.");
-            }
-
-            // Cria um arquivo temporário para a DLL
-            File tempDll = File.createTempFile("opencv_java4110", ".dll");
-            tempDll.deleteOnExit();
-
-            // Copia o conteúdo da DLL para o arquivo temporário
-            try (OutputStream out = new FileOutputStream(tempDll)) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = dllStream.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            }
-
-            // Carrega a DLL
-            System.load(tempDll.getAbsolutePath());
-            System.out.println("OpenCV DLL carregada com sucesso: " + tempDll.getAbsolutePath());
-        } catch (IOException | UnsatisfiedLinkError e) {
-            System.err.println("Erro ao carregar a biblioteca nativa do OpenCV: " + e.getMessage());
-            throw new RuntimeException("Falha ao carregar a DLL do OpenCV", e);
-        }
-    }
-
-
     public ImagemEntity salvar(ImagemDto imagemDto) throws IOException {
-
-        System.out.println("Salvando imagem: " + imagemDto);
-
         ImagemEntity imagemEntity = new ImagemEntity(imagemDto);
-        boolean temRosto = false;
+        Map<String, String> metadados = ImagemMetadataUtil.extrairMetadados(imagemDto.imagem());
+        boolean fraude = ValidacaoFraudeUtil.verificarFraudePorMetadados(metadados);
 
-        if (imagemDto.tipo() == TipoValidacao.FACIAL) {
+        // Log para debug
+        metadados.forEach((chave, valor) ->
+                System.out.println("Meta: " + chave + " = " + valor)
+        );
+
+        var temRosto = false;
+        if (imagemDto.tipo().equals(TipoValidacao.FACIAL)) {
             temRosto = detectarRosto(imagemDto.imagem());
             imagemEntity.setFraudeDetectada(!temRosto);
         }
 
         imagemEntity.setDataHoraProcessamento(LocalDateTime.now());
+
+        if (fraude) {
+            // Enviar notificação (simulado por log ou HTTP)
+            System.out.println("⚠️ Fraude detectada! Notificando sistema interno...");
+        }
         return validacaoRepository.save(imagemEntity);
     }
 
     private boolean detectarRosto(MultipartFile imagem) throws IOException {
-        System.out.println("Biblioteca OpenCV carregada: " + Core.NATIVE_LIBRARY_NAME);
-        // Salva a imagem enviada em um arquivo temporário
-        File tempFile = File.createTempFile("imagem", ".jpg");
+        File tempFile = File.createTempFile("imagem", ".png");
         imagem.transferTo(tempFile); // mais seguro
-        System.out.println("Caminho temporário: " + tempFile.getAbsolutePath());
-        System.out.println("Existe? " + tempFile.exists());
-        System.out.println("Tamanho: " + tempFile.length());
-
-
-
-
         Mat imagemMat = Imgcodecs.imread(tempFile.getAbsolutePath());
         if (imagemMat.empty()) {
             tempFile.delete();
-            System.out.println("Erro ao carregar a imagem no OpenCV.");
+            System.err.println("Erro ao carregar a imagem no OpenCV.");
             return false;
         }
 
@@ -110,4 +85,24 @@ public class ValidacaoService {
 
         return rostosDetectados.toArray().length > 0;
     }
+
+    public static Map<String, String> extrairMetadados(MultipartFile imagem) {
+        Map<String, String> metadados = new HashMap<>();
+
+        try (InputStream inputStream = imagem.getInputStream()) {
+            Metadata metadata = ImageMetadataReader.readMetadata(inputStream);
+
+            for (Directory directory : metadata.getDirectories()) {
+                for (Tag tag : directory.getTags()) {
+                    metadados.put(tag.getTagName(), tag.getDescription());
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao ler os metadados da imagem: " + e.getMessage(), e);
+        }
+
+        return metadados;
+    }
 }
+

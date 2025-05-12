@@ -55,7 +55,7 @@ public class TesteValidacaoDigital {
                         melhorArquivo = arquivo.getName();
                     }
 
-                    if (correlacao > 0.85) {
+                    if (correlacao > 0.90) {
                         System.out.println("Imagem corresponde a: " + arquivo.getName() + " | Correlação: " + correlacao);
                         return true;
                     }
@@ -70,7 +70,7 @@ public class TesteValidacaoDigital {
 
 
     public static void main(String[] args) {
-        String imagem = "img.png";
+        String imagem = "digital-internet.jpg";
         String imagemTeste = "src/main/resources/imagensTeste/"+ imagem;
         String pastaReferencias = "src/main/resources/digitalreferences";
 

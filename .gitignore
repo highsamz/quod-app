@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+libs/opencv_java470.dll

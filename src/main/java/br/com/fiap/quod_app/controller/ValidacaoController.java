@@ -39,9 +39,9 @@ public class ValidacaoController {
         var arquivo = new ImagemDto(tipo, imagem);
         ImagemEntity imagemEntity = validacaoService.salvar(arquivo);
         if (imagemEntity.getFraudeDetectada()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Fraude detectada. Nenhum rosto encontrado.");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Fraude detectada");
         } else {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Imagem válida. Rosto detectado.");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Imagem válida");
         }
     }
 }

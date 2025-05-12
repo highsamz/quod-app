@@ -7,6 +7,7 @@ import br.com.fiap.quod_app.repository.ValidacaoRepository;
 import br.com.fiap.quod_app.utils.ImagemMetadataUtil;
 import br.com.fiap.quod_app.utils.ValidacaoDigitalUtil;
 import br.com.fiap.quod_app.utils.ValidacaoFraudeUtil;
+import br.com.fiap.quod_app.utils.ValidacaoRostoUtil;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
@@ -35,78 +36,44 @@ public class ValidacaoService {
 
     public ImagemEntity salvar(ImagemDto imagemDto) throws IOException {
         ImagemEntity imagemEntity = new ImagemEntity(imagemDto);
-        Map<String, String> metadados = ImagemMetadataUtil.extrairMetadados(imagemDto.imagem());
-        boolean fraude = ValidacaoFraudeUtil.verificarFraudePorMetadados(metadados);
-        boolean resultado = ValidacaoDigitalUtil.validarDigitalPorComparacao(imagemDto.imagem(), pastaReferencias);
-        System.out.println("O resultado é "+resultado);
+        imagemEntity.setDataHoraProcessamento(LocalDateTime.now());
 
-        // Log para debug
+        // Extrair metadados
+        Map<String, String> metadados = ImagemMetadataUtil.extrairMetadados(imagemDto.imagem());
         metadados.forEach((chave, valor) ->
                 System.out.println("Meta: " + chave + " = " + valor)
         );
 
-        var temRosto = false;
+        boolean fraudeDetectada = false;
+
+        if (ValidacaoFraudeUtil.verificarFraudePorMetadados(metadados)) {
+            fraudeDetectada = true;
+            System.out.println("Fraude por metadados detectada.");
+        }
+
+
         if (imagemDto.tipo().equals(TipoValidacao.FACIAL)) {
-            temRosto = detectarRosto(imagemDto.imagem());
-            imagemEntity.setFraudeDetectada(!temRosto);
-        }
-
-        imagemEntity.setDataHoraProcessamento(LocalDateTime.now());
-
-        if (fraude) {
-            // Enviar notificação (simulado por log ou HTTP)
-            System.out.println("⚠️ Fraude detectada! Notificando sistema interno...");
-        }
-        return validacaoRepository.save(imagemEntity);
-    }
-
-    private boolean detectarRosto(MultipartFile imagem) throws IOException {
-        File tempFile = File.createTempFile("imagem", ".png");
-        imagem.transferTo(tempFile); // mais seguro
-        Mat imagemMat = Imgcodecs.imread(tempFile.getAbsolutePath());
-        if (imagemMat.empty()) {
-            tempFile.delete();
-            System.err.println("Erro ao carregar a imagem no OpenCV.");
-            return false;
-        }
-
-        Mat imagemCinza = new Mat();
-        Imgproc.cvtColor(imagemMat, imagemCinza, Imgproc.COLOR_BGR2GRAY);
-
-        // Carrega o classificador Haarcascade via classpath
-        InputStream xmlStream = getClass().getResourceAsStream("/classifiers/haarcascade_frontalface_default.xml");
-        if (xmlStream == null) throw new IllegalStateException("Classificador XML não encontrado no classpath.");
-
-        File tempXml = File.createTempFile("haarcascade", ".xml");
-        tempXml.deleteOnExit();
-        Files.copy(xmlStream, tempXml.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-        CascadeClassifier detector = new CascadeClassifier(tempXml.getAbsolutePath());
-        MatOfRect rostosDetectados = new MatOfRect();
-        detector.detectMultiScale(imagemCinza, rostosDetectados);
-
-        tempFile.delete();
-
-        return rostosDetectados.toArray().length > 0;
-    }
-
-    public static Map<String, String> extrairMetadados(MultipartFile imagem) {
-        Map<String, String> metadados = new HashMap<>();
-
-        try (InputStream inputStream = imagem.getInputStream()) {
-            Metadata metadata = ImageMetadataReader.readMetadata(inputStream);
-
-            for (Directory directory : metadata.getDirectories()) {
-                for (Tag tag : directory.getTags()) {
-                    metadados.put(tag.getTagName(), tag.getDescription());
-                }
+            boolean temRosto = ValidacaoRostoUtil.detectarRosto(imagemDto.imagem());
+            if (!temRosto) {
+                fraudeDetectada = true;
+                System.out.println("Fraude por ausência de rosto detectada.");
             }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao ler os metadados da imagem: " + e.getMessage(), e);
+        } else if (imagemDto.tipo().equals(TipoValidacao.DIGITAL)) {
+            if (!ValidacaoDigitalUtil.validarDigitalPorComparacao(imagemDto.imagem(), pastaReferencias)) {
+                fraudeDetectada = true;
+                System.out.println("Fraude por digital detectada.");
+            }
+        } else if (imagemDto.tipo().equals(TipoValidacao.DOCUMENTO)) {
+            
         }
 
-        return metadados;
+        imagemEntity.setFraudeDetectada(fraudeDetectada);
+
+        if (fraudeDetectada) {
+            //notificarSistemaFraude(imagemDto); // chama API
+        }
+
+        return validacaoRepository.save(imagemEntity);
     }
 }
 

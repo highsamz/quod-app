@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 public record ImagemDto (
-        TipoValidacao tipo,
+        TipoValidacao tipo, // "facial", "digital" ou "documento"
         MultipartFile imagem
 ) {}
 

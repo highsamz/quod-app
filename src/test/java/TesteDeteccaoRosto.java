@@ -9,7 +9,7 @@ public class TesteDeteccaoRosto {
 
     public static void main(String[] args) {
         // Carrega a biblioteca OpenCV
-        System.load("C:\\Users\\samue\\trabalhos-faculdade\\quod-app\\libs\\opencv_java470.dll");
+        System.load(new java.io.File("src/main/resources/libs/opencv_java4110.dll").getAbsolutePath());
 
         // Caminho da imagem para teste
         String caminhoImagem = "src/main/resources/imagensTeste/rosto-desenhado.jpg"; // Substitua pelo caminho correto da sua imagem

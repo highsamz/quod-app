@@ -4,7 +4,7 @@ public class TesteOpenCV {
 
     static {
         try {
-            String caminhoDll = "C:\\Users\\samue\\trabalhos-faculdade\\quod-app\\libs\\opencv_java470.dll";
+            String caminhoDll = new java.io.File("src/main/resources/libs/opencv_java4110.dll").getAbsolutePath();
             System.load(caminhoDll);
             System.out.println("OpenCV DLL carregada com sucesso: " + caminhoDll);
         } catch (UnsatisfiedLinkError e) {
@@ -19,7 +19,7 @@ public class TesteOpenCV {
 
         try {
 
-            System.load("C:\\Users\\samue\\trabalhos-faculdade\\quod-app\\libs\\opencv_java470.dll");
+            System.load(new java.io.File("src/main/resources/libs/opencv_java4110.dll").getAbsolutePath());
             System.out.println("OpenCV DLL carregada com sucesso.");
         } catch (UnsatisfiedLinkError e) {
             System.err.println("Erro ao carregar a biblioteca nativa do OpenCV: " + e.getMessage());

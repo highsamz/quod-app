@@ -1,5 +1,3 @@
-package br.com.fiap.quod_app;
-
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -57,7 +55,7 @@ public class TesteValidacaoDigital {
                         melhorArquivo = arquivo.getName();
                     }
 
-                    if (correlacao > 0.90) {
+                    if (correlacao > 0.85) {
                         System.out.println("Imagem corresponde a: " + arquivo.getName() + " | Correlação: " + correlacao);
                         return true;
                     }
@@ -72,7 +70,7 @@ public class TesteValidacaoDigital {
 
 
     public static void main(String[] args) {
-        String imagem = "digital-internet.jpg";
+        String imagem = "img.png";
         String imagemTeste = "src/main/resources/imagensTeste/"+ imagem;
         String pastaReferencias = "src/main/resources/digitalreferences";
 

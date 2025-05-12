@@ -1,18 +1,17 @@
+package br.com.fiap.quod_app.utils;
+
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TesteValidacaoDigital {
+public class ValidacaoDigitalUtil {
 
-    static {
-        System.load("C:\\Users\\samue\\trabalhos-faculdade\\quod-app\\libs\\opencv_java470.dll");
-    }
-
-    // Calcula histograma de uma imagem em tons de cinza
     private static Mat calcularHistograma(Mat imagemCinza) {
         List<Mat> lista = new ArrayList<>();
         lista.add(imagemCinza);
@@ -23,8 +22,14 @@ public class TesteValidacaoDigital {
     }
 
     // Valida a digital comparando com a pasta de digitais de referência
-    public static boolean validarDigitalPorComparacao(String caminhoImagemEntrada, String pastaReferencias) {
-        Mat imagemEntrada = Imgcodecs.imread(caminhoImagemEntrada, Imgcodecs.IMREAD_GRAYSCALE);
+    public static boolean validarDigitalPorComparacao(MultipartFile imagem, String pastaReferencias) {
+        byte[] imagemBytes = null;
+        try {
+            imagemBytes = imagem.getBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Mat imagemEntrada = Imgcodecs.imdecode(new MatOfByte(imagemBytes), Imgcodecs.IMREAD_GRAYSCALE);
         if (imagemEntrada.empty()) {
             System.out.println("Erro ao carregar a imagem de entrada.");
             return false;
@@ -66,15 +71,5 @@ public class TesteValidacaoDigital {
         // Exibir melhor resultado mesmo que não tenha atingido o limiar
         System.out.println("Imagem mais próxima correspondente: " + melhorArquivo + " | Correlação: " + melhorCorrelacao);
         return false;
-    }
-
-
-    public static void main(String[] args) {
-        String imagem = "digital-correto.png";
-        String imagemTeste = "src/main/resources/imagensTeste/"+ imagem;
-        String pastaReferencias = "src/main/resources/digitalreferences";
-
-        boolean resultado = validarDigitalPorComparacao(imagemTeste, pastaReferencias);
-        System.out.println("Imagem " + (resultado ? "VALIDA" : "INVÁLIDA") + " como digital.");
     }
 }

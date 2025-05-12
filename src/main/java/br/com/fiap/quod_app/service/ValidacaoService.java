@@ -5,6 +5,7 @@ import br.com.fiap.quod_app.domain.TipoValidacao;
 import br.com.fiap.quod_app.dto.ImagemDto;
 import br.com.fiap.quod_app.repository.ValidacaoRepository;
 import br.com.fiap.quod_app.utils.ImagemMetadataUtil;
+import br.com.fiap.quod_app.utils.ValidacaoDigitalUtil;
 import br.com.fiap.quod_app.utils.ValidacaoFraudeUtil;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
@@ -30,11 +31,14 @@ public class ValidacaoService {
 
     @Autowired
     private ValidacaoRepository validacaoRepository;
+    private static String pastaReferencias = "src/main/resources/digitalreferences";
 
     public ImagemEntity salvar(ImagemDto imagemDto) throws IOException {
         ImagemEntity imagemEntity = new ImagemEntity(imagemDto);
         Map<String, String> metadados = ImagemMetadataUtil.extrairMetadados(imagemDto.imagem());
         boolean fraude = ValidacaoFraudeUtil.verificarFraudePorMetadados(metadados);
+        boolean resultado = ValidacaoDigitalUtil.validarDigitalPorComparacao(imagemDto.imagem(), pastaReferencias);
+        System.out.println("O resultado é "+resultado);
 
         // Log para debug
         metadados.forEach((chave, valor) ->

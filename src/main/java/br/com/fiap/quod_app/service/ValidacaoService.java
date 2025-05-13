@@ -4,10 +4,7 @@ import br.com.fiap.quod_app.domain.ImagemEntity;
 import br.com.fiap.quod_app.domain.TipoValidacao;
 import br.com.fiap.quod_app.dto.ImagemDto;
 import br.com.fiap.quod_app.repository.ValidacaoRepository;
-import br.com.fiap.quod_app.utils.ImagemMetadataUtil;
-import br.com.fiap.quod_app.utils.ValidacaoDigitalUtil;
-import br.com.fiap.quod_app.utils.ValidacaoFraudeUtil;
-import br.com.fiap.quod_app.utils.ValidacaoRostoUtil;
+import br.com.fiap.quod_app.utils.*;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
@@ -64,8 +61,12 @@ public class ValidacaoService {
                 System.out.println("Fraude por digital detectada.");
             }
         } else if (imagemDto.tipo().equals(TipoValidacao.DOCUMENTO)) {
-            
+            if (!ValidacaoDocumentoUtil.validarDocumentoPorComparacao(imagemDto.imagem(), pastaReferencias)) {
+                fraudeDetectada = true;
+                System.out.println("Fraude por documento detectada.");
+            }
         }
+
 
         imagemEntity.setFraudeDetectada(fraudeDetectada);
 

@@ -60,7 +60,7 @@ public class ValidacaoDigitalUtil {
                         melhorArquivo = arquivo.getName();
                     }
 
-                    if (correlacao > 0.80) {
+                    if (correlacao > 0.85) {
                         System.out.println("Imagem corresponde a: " + arquivo.getName() + " | Correlação: " + correlacao);
                         return true;
                     }

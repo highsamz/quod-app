@@ -20,7 +20,10 @@ public class ValidacaoService {
     private ValidacaoRepository validacaoRepository;
     @Autowired
     private AcionarEndpointService acionarEndpointService;
-    private static String pastaReferencias = "src/main/resources/digitalreferences";
+
+
+    private static final String pastaReferenciasDigital = "src/main/resources/digitalreferences";
+    private static final String pastaReferenciasDocumentos = "src/main/resources/documentoreferences";
 
     public ImagemEntity salvar(ImagemDto imagemDto) throws IOException {
         ImagemEntity imagemEntity = new ImagemEntity(imagemDto);
@@ -34,27 +37,25 @@ public class ValidacaoService {
 
         boolean fraudeDetectada = false;
 
-        if (imagemDto.tipo().equals(TipoValidacao.FACIAL) || imagemDto.tipo().equals(TipoValidacao.DOCUMENTO)){
+
+        if (imagemDto.tipo().equals(TipoValidacao.FACIAL)) {
+            boolean temRosto = ValidacaoRostoUtil.detectarRosto(imagemDto.imagem());
             if (ValidacaoFraudeUtil.verificarFraudePorMetadados(metadados)) {
                 fraudeDetectada = true;
                 System.out.println("Fraude por metadados detectada.");
             }
-        }
-
-
-        if (imagemDto.tipo().equals(TipoValidacao.FACIAL)) {
-            boolean temRosto = ValidacaoRostoUtil.detectarRosto(imagemDto.imagem());
             if (!temRosto) {
                 fraudeDetectada = true;
                 System.out.println("Fraude por ausência de rosto detectada.");
+
             }
         } else if (imagemDto.tipo().equals(TipoValidacao.DIGITAL)) {
-            if (!ValidacaoDigitalUtil.validarDigitalPorComparacao(imagemDto.imagem(), pastaReferencias)) {
+            if (!ValidacaoDigitalUtil.validarDigitalPorComparacao(imagemDto.imagem(), pastaReferenciasDigital)) {
                 fraudeDetectada = true;
                 System.out.println("Fraude por digital detectada.");
             }
         } else if (imagemDto.tipo().equals(TipoValidacao.DOCUMENTO)) {
-            if (!ValidacaoDocumentoUtil.validarDocumentoPorComparacao(imagemDto.imagem(), pastaReferencias)) {
+            if (!ValidacaoDocumentoUtil.validarDocumentoPorComparacao(imagemDto.imagem(), pastaReferenciasDocumentos)) {
                 fraudeDetectada = true;
                 System.out.println("Fraude por documento detectada.");
             }

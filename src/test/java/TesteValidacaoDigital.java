@@ -70,7 +70,7 @@ public class TesteValidacaoDigital {
 
 
     public static void main(String[] args) {
-        String imagem = "digital-correto.png";
+        String imagem = "Digital-Sem-Fraude.png";
         String imagemTeste = "src/main/resources/imagensTeste/"+ imagem;
         String pastaReferencias = "src/main/resources/digitalreferences";
 

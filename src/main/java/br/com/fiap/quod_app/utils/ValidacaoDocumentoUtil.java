@@ -21,7 +21,7 @@ public class ValidacaoDocumentoUtil {
         return hist;
     }
 
-    public static boolean validarDocumentoPorComparacao(MultipartFile imagem, String pastaReferencias) {
+    public static boolean validarDocumentoPorComparacao(MultipartFile imagem, String pastaReferenciasDocumentos) {
         byte[] imagemBytes;
         try {
             imagemBytes = imagem.getBytes();
@@ -37,7 +37,7 @@ public class ValidacaoDocumentoUtil {
 
         Mat histEntrada = calcularHistograma(imagemEntrada);
 
-        File pasta = new File(pastaReferencias);
+        File pasta = new File(pastaReferenciasDocumentos);
         File[] arquivos = pasta.listFiles();
 
         if (arquivos == null || arquivos.length == 0) {
@@ -60,7 +60,7 @@ public class ValidacaoDocumentoUtil {
                         melhorArquivo = arquivo.getName();
                     }
 
-                    if (correlacao > 0.50) {
+                    if (correlacao > 0.40) {
                         System.out.println("Documento corresponde a: " + arquivo.getName() + " | Correlação: " + correlacao);
                         return true;
                     }

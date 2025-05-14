@@ -60,7 +60,7 @@ public class ValidacaoDocumentoUtil {
                         melhorArquivo = arquivo.getName();
                     }
 
-                    if (correlacao > 0.40) {
+                    if (correlacao > 0.60) {
                         System.out.println("Documento corresponde a: " + arquivo.getName() + " | Correlação: " + correlacao);
                         return true;
                     }

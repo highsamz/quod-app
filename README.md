@@ -61,12 +61,14 @@ Este projeto é uma aplicação backend desenvolvida em **Java (Spring Boot)** p
 - Sistema Operacional compatível com a biblioteca nativa do OpenCV
 
 ### 1. Subir o MongoDB via Docker (opcional)
-
 ```bash
 docker run --name mongo-test -d -p 27017:27017 mongo
 
-### 2 Deve buildar o projeto
+```
+### 2. Deve buildar o projeto
+```bash
 mvn clean package
-
-### Rodar o script abaixo:
+```
+### 3. Rodar o script abaixo (Pelo Git Bash):
+```Bash
 java -Djava.library.path="libs/opencv_java470.dll" -jar target/quod-app-0.0.1-SNAPSHOT.jar
